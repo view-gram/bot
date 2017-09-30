@@ -53,9 +53,9 @@ function writefile(filename, input)
 	return true
 end
 function process_join(i, naji)
-	if naji.code_ == 429 then
+	if naji.code_ == 1 then
 		local message = tostring(naji.message_)
-		local Time = message:match('%d+') + 85
+		local Time = message:match('%d+') + 200
 		redis:setex("botBOT-IDmaxjoin", tonumber(Time), true)
 	else
 		redis:srem("botBOT-IDgoodlinks", i.link)
@@ -76,9 +76,9 @@ function process_link(i, naji)
 			redis:srem("botBOT-IDwaitelinks", i.link)
 			redis:sadd("botBOT-IDgoodlinks", i.link)
 		end
-	elseif naji.code_ == 429 then
+	elseif naji.code_ == 1 then
 		local message = tostring(naji.message_)
-		local Time = message:match('%d+') + 85
+		local Time = message:match('%d+') + 200
 		redis:setex("botBOT-IDmaxlink", tonumber(Time), true)
 	else
 		redis:srem("botBOT-IDwaitelinks", i.link)
@@ -179,7 +179,7 @@ function tdcli_update_callback(data)
 			if redis:scard("botBOT-IDwaitelinks") ~= 0 then
 				local links = redis:smembers("botBOT-IDwaitelinks")
 				for x,y in ipairs(links) do
-					if x == 6 then redis:setex("botBOT-IDmaxlink", 65, true) return end
+					if x == 2 then redis:setex("botBOT-IDmaxlink", 70, true) return end
 					tdcli_function({ID = "CheckChatInviteLink",invite_link_ = y},process_link, {link=y})
 				end
 			end
@@ -193,7 +193,7 @@ function tdcli_update_callback(data)
 				local links = redis:smembers("botBOT-IDgoodlinks")
 				for x,y in ipairs(links) do
 					tdcli_function({ID = "ImportChatInviteLink",invite_link_ = y},process_join, {link=y})
-					if x == 2 then redis:setex("botBOT-IDmaxjoin", 65, true) return end
+					if x == 1 then redis:setex("botBOT-IDmaxjoin", 270, true) return end
 				end
 			end
 		end
@@ -588,7 +588,7 @@ function tdcli_update_callback(data)
 								from_background_ = 1
 							}, dl_cb, nil)
 							if i % 4 == 0 then
-								os.execute("sleep 3")
+								os.execute("sleep 90")
 							end
 						end
 					else
@@ -702,7 +702,7 @@ function tdcli_update_callback(data)
 								ID = "AddChatMember",
 								chat_id_ = v,
 								user_id_ = matches,
-								forward_limit_ =  50
+								forward_limit_ =  1
 							}, dl_cb, nil)
 						end	
 					end
